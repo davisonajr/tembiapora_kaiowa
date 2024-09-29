@@ -31,6 +31,7 @@
         "@twurple/auth": "^7.1.0",
         "@twurple/chat": "^7.1.0",
         "@twurple/eventsub-ws": "^7.1.0",
+        "lorem-ipsum": "^2.0.8",
         "phaser": "^3.85.2",
         "vue": "^3.4.27"
     },

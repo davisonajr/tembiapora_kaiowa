@@ -5,10 +5,17 @@ import { AUTO, Game } from 'phaser';
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
-    width: 1920,
-    height: 1080,
+    width: 800,
+    height: 600,
     parent: 'game-container',
     backgroundColor: '#cdedf6',
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 0 },
+            debug: false
+        }
+    },
     scene: [
         MainMenu
     ]

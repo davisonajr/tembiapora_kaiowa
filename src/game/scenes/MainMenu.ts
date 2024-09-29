@@ -1,39 +1,54 @@
 import { GameObjects, Scene } from 'phaser';
 
 import { EventBus } from '../EventBus';
+import User from '../sprites/User';
+import Pet from '../sprites/Pet';
 
-export class MainMenu extends Scene
-{
+export class MainMenu extends Scene {
     background: GameObjects.Image;
     logo: GameObjects.Image;
     title: GameObjects.Text;
     logoTween: Phaser.Tweens.Tween | null;
-
-    constructor ()
-    {
+    user: User;
+    pet: Pet;
+    
+    constructor() {
         super('MainMenu');
     }
-    preload ()
-    {
+
+    preload() {
         this.load.image('grass', 'assets/textures/grass.png');
         this.load.image('stone', 'assets/textures/stone.png');
 
-    }
-    create ()
-    {
-        this.add.tileSprite(0, 0, 1920, 1080, 'grass').setOrigin(0, 0);
-
-        const brickWidth = 60; // Largura do bloco
-        const startX = 10; // Ponto inicial no eixo X
-        const yPosition = 1050; // Posição fixa no eixo Y
-    
-        // Lista de texturas para a parede
-        const wallTextures = ['stone', 'stone', 'stone', 'stone', 'stone'];
-    
-        // Adiciona as texturas dinamicamente em linha
-        wallTextures.forEach((texture, index) => {
-            this.add.image(startX + brickWidth * index, yPosition, texture);
+        this.load.spritesheet('male', 'assets/spritesheets/male.png', {
+            frameWidth: 32,
+            frameHeight: 48 
+        });
+        this.load.spritesheet('female', 'assets/spritesheets/female.png', {
+            frameWidth: 32,
+            frameHeight: 48
+        });
+        this.load.spritesheet('dog', 'assets/spritesheets/dog.png', {
+            frameWidth: 32,
+            frameHeight: 32
+        });
+        this.load.spritesheet('cat', 'assets/spritesheets/cat.png', {
+            frameWidth: 32,
+            frameHeight: 32
         });
     }
+    create() {
+        this.add.tileSprite(0, 0, 1920, 1080, 'grass').setOrigin(0, 0);
+
+        // Criar o jogador
+        this.user = new User(this,'davison.ajr');
+        // Criar o cachorro
+        this.pet = new Pet(this,this.user)
+
+        this.user.setPet(this.pet);
+    }
     
+    update() {
+        this.user.update();
+    }
 }
