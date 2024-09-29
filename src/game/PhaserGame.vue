@@ -2,32 +2,54 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { EventBus } from './EventBus';
 import StartGame from './main';
-import Phaser from 'phaser';
+import authProvider from '@/auth/authProviderSetup';
+import { ChatClient } from '@twurple/chat';
 
 // Save the current scene instance
 const scene = ref();
 const game = ref();
+const chatClient = ref();
 
-const emit = defineEmits(['current-active-scene']);
+const emit = defineEmits(
+    [
+        'current-active-scene',
+        'message'
+    ]
+);
 
-onMounted(() => {
+onMounted(async () => {
 
     game.value = StartGame('game-container');
-    
-    EventBus.on('current-scene-ready', (scene_instance: Phaser.Scene) => {
-        
-        emit('current-active-scene', scene_instance);
-    
-        scene.value = scene_instance;
-    
+    let client = new ChatClient({
+        authProvider,
+        channels: ['superdoutor']
     });
 
+    await client.connect();
+
+    chatClient.value = client;
+
+    client.onMessage((channel, user, message) => {
+        EventBus.emit('message', {
+            channel: channel,
+            user: user,
+            message: message
+        });
+    });
+
+    // setInterval(function(){
+
+    //     EventBus.emit('message', {
+    //         channel: 'test',
+    //         user: 'superdoutor',
+    //         message: 'Isto é uma mensagem'
+    //     });
+    // },12000);
 });
 
 onUnmounted(() => {
 
-    if (game.value)
-    {
+    if (game.value) {
         game.value.destroy(true);
         game.value = null;
     }

@@ -11,6 +11,7 @@ export class MainMenu extends Scene {
     logoTween: Phaser.Tweens.Tween | null;
     user: User;
     pet: Pet;
+    users: Array<User> = [];
     
     constructor() {
         super('MainMenu');
@@ -36,16 +37,31 @@ export class MainMenu extends Scene {
             frameWidth: 32,
             frameHeight: 32
         });
+
     }
     create() {
         this.add.tileSprite(0, 0, 1920, 1080, 'grass').setOrigin(0, 0);
 
         // Criar o jogador
-        this.user = new User(this,'davison.ajr');
+        let user = new User(this,'superdoutor');
         // Criar o cachorro
-        this.pet = new Pet(this,this.user)
+        this.pet = new Pet(this,user)
 
-        this.user.setPet(this.pet);
-        this.user.moveRandomly();
+        user.setPet(this.pet);
+        user.moveRandomly();
+
+        this.users.push(user);
+
+        EventBus.on('message',(data)=>{
+
+            let username = data.user;
+            let channel = data.channel;
+            let message = data.message;
+
+            let user = this.users.find((u)=>{ return u.username === username;});
+            if(user){
+                user.addSpeech(message);
+            }
+        });
     }
 }
