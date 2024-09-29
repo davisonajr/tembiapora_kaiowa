@@ -21,27 +21,27 @@ export class MainMenu extends Scene {
         this.load.image('stone', 'assets/textures/stone.png');
 
         this.load.spritesheet('male', 'assets/spritesheets/male.png', {
-            frameWidth: 32,  // Largura de cada quadro da sprite
-            frameHeight: 48  // Altura de cada quadro da sprite
+            frameWidth: 32,
+            frameHeight: 48 
         });
         this.load.spritesheet('female', 'assets/spritesheets/female.png', {
-            frameWidth: 32,  // Largura de cada quadro da sprite
-            frameHeight: 48  // Altura de cada quadro da sprite
+            frameWidth: 32,
+            frameHeight: 48
         });
         this.load.spritesheet('dog', 'assets/spritesheets/dog.png', {
-            frameWidth: 32,  // Largura de cada quadro da sprite
-            frameHeight: 32  // Altura de cada quadro da sprite
+            frameWidth: 32,
+            frameHeight: 32
         });
         this.load.spritesheet('cat', 'assets/spritesheets/cat.png', {
-            frameWidth: 32,  // Largura de cada quadro da sprite
-            frameHeight: 32  // Altura de cada quadro da sprite
+            frameWidth: 32,
+            frameHeight: 32
         });
     }
     create() {
         this.add.tileSprite(0, 0, 1920, 1080, 'grass').setOrigin(0, 0);
 
         // Criar o jogador
-        this.user = new User(this);
+        this.user = new User(this,'davison.ajr');
         // Criar o cachorro
         this.pet = new Pet(this,this.user)
 

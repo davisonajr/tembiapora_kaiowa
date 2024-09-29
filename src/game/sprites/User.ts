@@ -1,59 +1,81 @@
 import { Scene } from 'phaser';
 import Pet from './Pet';
+import { loremIpsum } from "lorem-ipsum";
 
-export default class User extends Phaser.Physics.Arcade.Sprite{
+export default class User extends Phaser.Physics.Arcade.Sprite {
+
+    // public state: string;
 
     public scene: Scene;
     public uniqueId: string;
     private sprite: string;
     private user;
-    private pet: Pet|null;
+    private pet: Pet | null;
     public sprites: Array<string> = ['male', 'female'];
+    public username: string;
+    private usernameText: Phaser.GameObjects.Text;
+    private usernameBackground: Phaser.GameObjects.Graphics;
 
-    constructor(scene: Scene, sprite = 'male', x = 32, y = 48) {
+    private fontSize: integer = 12;
+    private speechBubble: Phaser.GameObjects.Graphics;
+    private speechText: Phaser.GameObjects.Text;
+    private padding: integer = 10;
+    private bubbleWidth: integer = 200
+
+    constructor(scene: Scene, username: string, sprite = 'male', x = 32, y = 48) {
         super(scene, x, y, sprite);
+
         this.scene = scene;
         this.sprite = this.randomSprite();
 
-        // Gerar um ID único
         this.uniqueId = `user_${Date.now()}`;
+        this.username = username;
 
-        // Carregar sprite aleatória (male ou female)
-
-        // Adicionar o sprite com física
         this.user = this.scene.physics.add.sprite(x, y, this.sprite);
 
-        // Definir colisão com as bordas do mundo
         this.user.setCollideWorldBounds(true);
 
-        // Criar as animações
         this.createAnimations();
+        this.createUsernameDisplay();
+
+        this.speechBubble = this.scene.add.graphics();
+        this.speechText = this.scene.add.text(0, 0, '', { font: '16px Arial', color: '#000000' });
+
+        this.setupSpeech();
     }
+
 
     update() {
         const cursors = this.scene.input.keyboard.createCursorKeys();
 
-        // Parar o jogador ao não pressionar nenhuma tecla
         this.user.setVelocity(0);
+        this.state = 'idle';
 
         if (cursors.left.isDown) {
+            // this.setState('moving');
             this.user.setVelocityX(-80);
             this.user.anims.play(this.uniqueId + '_left', true);
         } else if (cursors.right.isDown) {
+            // this.setState('moving');
             this.user.setVelocityX(80);
             this.user.anims.play(this.uniqueId + '_right', true);
         } else if (cursors.up.isDown) {
+            // this.setState('moving');
             this.user.setVelocityY(-80);
             this.user.anims.play(this.uniqueId + '_up', true);
         } else if (cursors.down.isDown) {
+            // this.setState('moving');
             this.user.setVelocityY(80);
             this.user.anims.play(this.uniqueId + '_down', true);
         } else {
+            // this.setState('idle');
             this.user.anims.stop();
         }
-        if(this.pet)
-        {
-            this.pet.update(this.user.x,this.user.y);  
+
+        this.updateUsernamePosition();
+
+        if (this.pet) {
+            this.pet.update();
         }
     }
 
@@ -89,11 +111,130 @@ export default class User extends Phaser.Physics.Arcade.Sprite{
         });
     }
 
+    createUsernameDisplay() {
+        this.usernameBackground = this.scene.add.graphics();
+        this.usernameBackground.fillStyle(0x000000, 0.5);
+        this.usernameBackground.fillRoundedRect(
+            this.user.x,
+            this.user.y,
+            this.backgroundWidth(),
+            this.backgroundHeight(),
+            10
+        );
+
+        this.usernameText = this.scene.add.text(this.user.x, this.user.y, this.username, {
+            fontSize: `${this.fontSize}px`,
+            color: '#ffffff',
+            align: 'center'
+        }).setOrigin(0.5);
+    }
+
+    updateUsernamePosition() {
+
+        this.usernameBackground.setPosition(
+            this.user.x - this.backgroundWidth() + 2 * this.padding,
+            this.user.y - this.backgroundHeight() + .5 * this.padding
+        );
+
+        this.usernameText.setPosition(this.user.x, this.user.y + 40);
+    }
+
+    bubbleX() {
+        return this.user.x + this.padding;
+    }
+    bubbleY() {
+        return this.user.y - this.y;
+    }
+
+    backgroundWidth() {
+        return this.username.length * (Math.min(this.padding, this.fontSize) - 1);
+    }
+    backgroundHeight() {
+        return this.fontSize + this.padding;
+    }
+
     setPet(pet: Pet) {
         this.pet = pet;
     }
 
     randomSprite() {
         return this.sprites[Math.floor(Math.random() * this.sprites.length)]
+    }
+
+    // Função para gerar frase aleatória
+    generateRandomPhrase(): string {
+        return loremIpsum({
+            units: "sentences",
+            count: 1,
+            sentenceLowerBound: 3,
+            sentenceUpperBound: 7,
+        });
+    }
+
+    // Função para mostrar o balão de fala
+    showSpeechBubble(text: string) {
+        this.createBubbleText(text);
+        this.createBubbleBackground()
+    }
+
+    updateSpeechBubble() {
+        const bubbleX = this.bubbleX();
+        const bubbleY = this.bubbleY();
+
+        this.speechText.setPosition(
+            bubbleX,
+            bubbleY - this.speechText.height
+        );
+
+        this.createBubbleBackground();
+    }
+
+    createBubbleText(text: string) {
+        const bubbleX = this.bubbleX();
+        const bubbleY = this.bubbleY();
+
+        this.speechText.setText(text);
+        this.speechText.setWordWrapWidth(this.bubbleWidth - 2 * this.padding);
+        this.speechText.setPosition(bubbleX, bubbleY - this.speechText.height);
+    }
+
+    createBubbleBackground() {
+        const bubbleX = this.bubbleX();
+        const bubbleY = this.bubbleY();
+
+        this.speechBubble.clear();
+        this.speechBubble.lineStyle(2, 0x000000, 1);
+        this.speechBubble.fillStyle(0xffffff, 1);
+        this.speechBubble.fillRoundedRect(bubbleX - this.padding, bubbleY - this.speechText.height - this.padding, this.speechText.width + 2 * this.padding, this.speechText.height + 2 * this.padding, 10);
+        this.speechBubble.strokeRoundedRect(bubbleX - this.padding, bubbleY - this.speechText.height - this.padding, this.speechText.width + 2 * this.padding, this.speechText.height + 2 * this.padding, 10);
+    }
+
+    addSpeech(phrase: string) {
+        this.showSpeechBubble(phrase);
+
+        const updateEvent = this.scene.time.addEvent({
+            delay: 1,
+            loop: true,
+            callback: () => {
+                this.updateSpeechBubble();
+            }
+        });
+
+        this.scene.time.delayedCall(3000, () => {
+            this.speechBubble.clear();
+            this.speechText.setText('');
+            updateEvent.remove();
+        });
+
+    }
+    setupSpeech() {
+        this.scene.time.addEvent({
+            delay: 10000,
+            loop: true,
+            callback: () => {
+                const phrase = this.generateRandomPhrase();
+                this.addSpeech(phrase);
+            }
+        });
     }
 }

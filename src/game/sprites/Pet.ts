@@ -59,11 +59,11 @@ export default class Pet extends Phaser.Physics.Arcade.Sprite {
         });
     }
 
-    update(x:integer, y:integer) {
-        let distance = Phaser.Math.Distance.Between(x, y, this.pet.x, this.pet.y);
+    update() {
+        let distance = Phaser.Math.Distance.Between(this.owner.user.x, this.owner.user.y, this.pet.x, this.pet.y);
 
         if (distance > 32) {
-            let angle = Phaser.Math.Angle.Between(this.pet.x, this.pet.y, x, y);
+            let angle = Phaser.Math.Angle.Between(this.pet.x, this.pet.y, this.owner.user.x, this.owner.user.y);
 
             let speed = 60;
 
