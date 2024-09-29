@@ -21,6 +21,8 @@ export default class User extends Phaser.Physics.Arcade.Sprite {
     private speechText: Phaser.GameObjects.Text;
     private padding: integer = 10;
     private bubbleWidth: integer = 200
+    private movementTimer: Phaser.Time.TimerEvent | null = null;
+    private readonly moveSpeed: number = 60;
 
     constructor(scene: Scene, username: string, sprite = 'male', x = 32, y = 48) {
         super(scene, x, y, sprite);
@@ -41,39 +43,33 @@ export default class User extends Phaser.Physics.Arcade.Sprite {
         this.speechBubble = this.scene.add.graphics();
         this.speechText = this.scene.add.text(0, 0, '', { font: '16px Arial', color: '#000000' });
 
-        this.setupSpeech();
+        this.scene.events.on('update', this.update, this);
     }
 
-
     update() {
-        const cursors = this.scene.input.keyboard.createCursorKeys();
 
-        this.user.setVelocity(0);
-        this.state = 'idle';
-
-        if (cursors.left.isDown) {
-            // this.setState('moving');
-            this.user.setVelocityX(-80);
-            this.user.anims.play(this.uniqueId + '_left', true);
-        } else if (cursors.right.isDown) {
-            // this.setState('moving');
-            this.user.setVelocityX(80);
-            this.user.anims.play(this.uniqueId + '_right', true);
-        } else if (cursors.up.isDown) {
-            // this.setState('moving');
-            this.user.setVelocityY(-80);
-            this.user.anims.play(this.uniqueId + '_up', true);
-        } else if (cursors.down.isDown) {
-            // this.setState('moving');
-            this.user.setVelocityY(80);
-            this.user.anims.play(this.uniqueId + '_down', true);
+        if (this.user.body.velocity.x !== 0 || this.user.body.velocity.y !== 0) {
+            if (Math.abs(this.user.body.velocity.x) > Math.abs(this.user.body.velocity.y)) {
+                if (this.user.body.velocity.x > 0) {
+                    this.user.anims.play(this.uniqueId + '_right', true);
+                } else {
+                    this.user.anims.play(this.uniqueId + '_left', true);
+                }
+            } else {
+                if (this.user.body.velocity.y > 0) {
+                    this.user.anims.play(this.uniqueId + '_down', true);
+                } else {
+                    this.user.anims.play(this.uniqueId + '_up', true);
+                }
+            }
         } else {
-            // this.setState('idle');
             this.user.anims.stop();
         }
 
+        // Atualize a posição do nome de usuário
         this.updateUsernamePosition();
 
+        // Atualize o pet, se existir
         if (this.pet) {
             this.pet.update();
         }
@@ -227,14 +223,60 @@ export default class User extends Phaser.Physics.Arcade.Sprite {
         });
 
     }
-    setupSpeech() {
-        this.scene.time.addEvent({
-            delay: 10000,
-            loop: true,
-            callback: () => {
-                const phrase = this.generateRandomPhrase();
-                this.addSpeech(phrase);
+    moveRandomly() {
+        if (this.movementTimer) {
+            this.movementTimer.remove();
+        }
+
+        const moveUser = () => {
+            const randomDelay = Phaser.Math.Between(1500, 3000);
+            const direction = Phaser.Math.Between(0, 4);
+            const speed = this.moveSpeed;
+
+            this.user.setVelocity(0);
+
+            switch (direction) {
+                case 0: // Cima
+                    this.user.y - speed > 0
+                        ? this.user.setVelocityY(-speed)
+                        : this.user.setVelocityY(speed)
+
+                    break;
+                case 1: // Baixo
+                    (this.user.y + speed) < this.scene.game.config.height
+                        ? this.user.setVelocityY(speed)
+                        : this.user.setVelocityY(-speed)
+                        ;
+                    break;
+                case 2: // Esquerda
+                    this.user.x - speed > 0
+                        ? this.user.setVelocityX(-speed)
+                        : this.user.setVelocityX(speed)
+                        ;
+                    break;
+                case 3: // Direita
+                    (this.user.x + speed) < this.scene.game.config.width
+                        ? this.user.setVelocityX(speed)
+                        : this.user.setVelocityX(-speed)
+                        ;
+                    break;
+                default:
+                    this.stopRandomMovement();
+                    break;
             }
-        });
+
+            this.movementTimer = this.scene.time.delayedCall(randomDelay, moveUser);
+        };
+
+        moveUser();
+    }
+
+
+    stopRandomMovement() {
+        if (this.movementTimer) {
+            this.movementTimer.remove();
+            this.movementTimer = null;
+        }
+        this.user.setVelocity(0);
     }
 }

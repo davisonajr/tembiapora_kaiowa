@@ -46,9 +46,6 @@ export class MainMenu extends Scene {
         this.pet = new Pet(this,this.user)
 
         this.user.setPet(this.pet);
-    }
-    
-    update() {
-        this.user.update();
+        this.user.moveRandomly();
     }
 }
