@@ -27,8 +27,6 @@ onMounted(async () => {
 
     await client.connect();
 
-    chatClient.value = client;
-
     client.onMessage((channel, user, message) => {
         EventBus.emit('message', {
             channel: channel,
@@ -36,15 +34,8 @@ onMounted(async () => {
             message: message
         });
     });
-
-    // setInterval(function(){
-
-    //     EventBus.emit('message', {
-    //         channel: 'test',
-    //         user: 'superdoutor',
-    //         message: 'Isto é uma mensagem'
-    //     });
-    // },12000);
+    
+    chatClient.value = client;
 });
 
 onUnmounted(() => {
