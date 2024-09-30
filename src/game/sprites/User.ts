@@ -108,49 +108,47 @@ export default class User extends Phaser.Physics.Arcade.Sprite {
     }
 
     createUsernameDisplay() {
-        this.usernameBackground = this.scene.add.graphics();
-        this.usernameBackground.fillStyle(0x000000, 0.5);
-        this.usernameBackground.fillRoundedRect(
-            this.user.x,
-            this.user.y,
-            this.backgroundWidth(),
-            this.backgroundHeight(),
-            10
-        );
 
         this.usernameText = this.scene.add.text(this.user.x, this.user.y, this.username, {
-            fontSize: `${this.fontSize}px`,
+            fontSize: this.fontSize,
             color: '#ffffff',
             align: 'center'
         }).setOrigin(0.5);
+
+        this.usernameBackground = this.scene.add.graphics();
+        this.usernameBackground.fillStyle(0x000000, 0.5);
+        this.usernameBackground.fillRoundedRect(
+            this.usernameText.x,
+            this.usernameText.y,
+            this.usernameText.width + 2 * this.padding,
+            this.usernameText.height + .2 * this.padding,
+            6
+        );
     }
 
     updateUsernamePosition() {
 
+        this.usernameText.setPosition(
+            this.user.x,
+            this.user.y + 2 * this.usernameText.height 
+        );
         this.usernameBackground.setPosition(
-            this.user.x - this.backgroundWidth() + 2 * this.padding,
-            this.user.y - this.backgroundHeight() + .5 * this.padding
+            this.usernameText.x - .5 * this.usernameText.width - this.x - this.padding,
+            this.usernameText.y - .5 * this.usernameText.height - this.y
         );
 
-        this.usernameText.setPosition(this.user.x, this.user.y + 40);
     }
+
+    setPet(pet: Pet) {
+        this.pet = pet;
+    }
+
 
     bubbleX() {
         return this.user.x + this.padding;
     }
     bubbleY() {
         return this.user.y - this.y;
-    }
-
-    backgroundWidth() {
-        return this.username.length * (Math.min(this.padding, this.fontSize) - 1);
-    }
-    backgroundHeight() {
-        return this.fontSize + this.padding;
-    }
-
-    setPet(pet: Pet) {
-        this.pet = pet;
     }
 
     randomSprite() {

@@ -9,6 +9,7 @@ export default class Pet extends Phaser.Physics.Arcade.Sprite {
     public scene: Scene;
     private sprite;
     private sprites: Array<string> = ['dog','cat'];
+    private speed: integer = 50;
 
     constructor(scene: Scene, user: User, x = 32, y = 48) {
         
@@ -65,7 +66,7 @@ export default class Pet extends Phaser.Physics.Arcade.Sprite {
         if (distance > 32) {
             let angle = Phaser.Math.Angle.Between(this.pet.x, this.pet.y, this.owner.user.x, this.owner.user.y);
 
-            let speed = 60;
+            let speed = this.speed;
 
             let velocityX = Math.cos(angle) * speed;
             let velocityY = Math.sin(angle) * speed;
